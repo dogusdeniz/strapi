@@ -8,7 +8,7 @@ module.exports = ({ strapi }) => ({
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 
-    const { targetField, default: defaultValue, options } = attributes[field];
+    const { targetField, default: defaultValue, options, generator } = attributes[field];
     const targetValue = _.get(data, targetField);
 
     if (!_.isEmpty(targetValue)) {
@@ -16,6 +16,16 @@ module.exports = ({ strapi }) => ({
         contentTypeUID,
         field,
         value: slugify(targetValue, options),
+      });
+    }
+
+    if(generator){
+      const value = await strapi.service(generator.uid)[generator.action]();
+
+      return this.findUniqueUID({
+        contentTypeUID,
+        field,
+        value: value,
       });
     }
 
